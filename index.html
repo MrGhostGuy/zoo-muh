@@ -67,8 +67,11 @@
       #0e1120;
     border-bottom:1px solid var(--line);
   }
-  .art img{width:104px;height:104px;image-rendering:pixelated;
-    filter:drop-shadow(0 6px 14px rgba(0,0,0,.6))}
+  .art img{
+    width:104px;height:104px;image-rendering:pixelated;
+    mix-blend-mode:lighten;      /* drop the icon's own dark backdrop */
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.6));
+  }
   .art .soon{
     font-size:44px;opacity:.3;letter-spacing:.06em;
   }
@@ -173,7 +176,7 @@
            the set is complete.</p>
         <div class="how">Controls and genre revealed at launch.</div>
       </div>
-    </a>
+    </div>
 
   </div>
 
