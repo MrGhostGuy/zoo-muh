@@ -1,10 +1,10 @@
-# 3 of a Kind
+# Zoo-muh
 
 An original marble shooter built for the Rabbit R1.
 
 A chain-reaction marble shooter: fire coloured marbles from a dusty old-school
-cannon at a chain emerging from a mystical portal, and find **3 of a kind** to
-clear it before the bar swallows it in a black-void vortex.
+cannon at a chain emerging from a mystical portal, and **match three** to clear
+it before the bar swallows it in a black-void vortex.
 
 ## Controls (Rabbit R1)
 
@@ -34,11 +34,12 @@ Desktop also supports `Space` / `Enter` to shoot, arrows to aim, `S` to swap,
 
 ## Live
 
-https://mrghostguy.github.io/3-of-a-kind/
+https://mrghostguy.github.io/zoo-muh/
 
 ## Notes
 
 Original art, code and audio — no copyrighted characters, levels or music.
 Built by Jeff H. (Mr. Ghost).
 
-Previously hosted at `zuma-r1`, which now redirects here.
+Previously hosted at `3-of-a-kind`, which now redirects here, and before that
+at `zuma-r1`, which redirects here too.
