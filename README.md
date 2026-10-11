@@ -1,24 +1,44 @@
 # 3 of a Kind
 
-Three original arcade experiences built for the Rabbit R1.
+An original marble shooter built for the Rabbit R1.
 
-Each game is its **own individual experience** — its own repository, its own engine,
-its own live URL, and its own rules. Nothing is shared between them.
+A chain-reaction marble shooter: fire coloured marbles from a dusty old-school
+cannon at a chain emerging from a mystical portal, and find **3 of a kind** to
+clear it before the bar swallows it in a black-void vortex.
 
-| # | Game | Genre | Status | Live | Source |
-|---|------|-------|--------|------|--------|
-| 01 | [Zuma](https://github.com/MrGhostGuy/zuma-r1) | Marble shooter | Playable | [Play](https://mrghostguy.github.io/zuma-r1/) | `zuma-r1` |
-| 02 | — | — | In progress | — | — |
-| 03 | — | — | In progress | — | — |
+## Controls (Rabbit R1)
 
-## About
+| Input | Action |
+|-------|--------|
+| **Scroll wheel** | Aim |
+| **Side button** | Shoot |
+| Long-press side | Swap marble |
+| Tap | Swap marble |
 
-This repository is the landing page only. The games themselves are deliberately
-**not** vendored here — keeping them separate is the point.
+Desktop also supports `Space` / `Enter` to shoot, arrows to aim, `S` to swap,
+`M` for music, `Esc` for title.
 
-Everything is original work: code, art and audio. No copyrighted characters,
-levels or music.
+## Features
 
-## Site
+- 16 Zuma-style tracks (halo, horseshoe, serpentine, spiral, rose,
+  lemniscate, twin loops, grand spirals...)
+- Stone tunnels that hide the chain on late tracks
+- Chain-reverse panic moments
+- 6 powerups: bomb, lightning, reverse, accuracy, slow, score x2
+- Combo chains, plus a random powerup every 5 combo steps
+- Aim-guide line
+- Adventure, endless **Gauntlet** and one-life **Iron Frog** modes
+- Procedural tribal music and classic spring-launch / marble-clack effects
+- Hidden secret stage (flip the device upside-down, then click the side
+  button 1-2-3)
 
-Landing page is served by GitHub Pages from the repo root.
+## Live
+
+https://mrghostguy.github.io/3-of-a-kind/
+
+## Notes
+
+Original art, code and audio — no copyrighted characters, levels or music.
+Built by Jeff H. (Mr. Ghost).
+
+Previously hosted at `zuma-r1`, which now redirects here.
