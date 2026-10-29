@@ -1119,7 +1119,7 @@ function insertShot(sh){
   var ip=pathPos(sd);
   spawnInsert(ip.x,ip.y);
   sfx('insert');
-  if(!checkMatch(idx))clackSfx(1.2);
+  /* track clack removed - only launch/pop sounds remain */
 }
 
 function update(dt){
@@ -1185,7 +1185,9 @@ function update(dt){
         balls[i].d+=Math.min(gap,spd*CATCH*dt);
         if(target-balls[i].d<=0.4){
           balls[i].d=target;balls[i].clackFlash=0.12;
-          if(!checkMatch(i))clackSfx(0.62+Math.min(0.42,spd*0.015));
+          if(!checkMatch(i)){
+            /* track clack removed */
+          }
           if(state!=='play')return;
         }
       }else if(gap<0){balls[i].d=target}
@@ -1195,7 +1197,7 @@ function update(dt){
     if(balls.length&&balls[0].d<0)balls[0].d=0;
     for(var k=1;k<balls.length;k++){
       var t2=balls[k-1].d-SP;
-      if(balls[k].d>t2){balls[k].d=t2;balls[k].clackFlash=0.12;if(!checkMatch(k))clackSfx(0.6);if(state!=='play')return}
+      if(balls[k].d>t2){balls[k].d=t2;balls[k].clackFlash=0.12;if(!checkMatch(k)){/* track clack removed */}if(state!=='play')return}
     }
   }
   if(balls.length&&balls[0].d>=pathLen-4){startDying();return}
