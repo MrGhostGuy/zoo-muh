@@ -1085,8 +1085,17 @@ function levelClear(){
     if(waveNum()%3===0)gain=1;
   }else{
     var first=!clearedLv[''+lvlIdx];
+    var prevBest=levelBest[''+lvlIdx]||0;
+    var beatChallenge=!first && score>prevBest;
     if(first)clearedLv[''+lvlIdx]=1;
-    gain=first?2:1;              /* first clear double reward, replays still pay */
+    if(first||beatChallenge){
+      levelBest[''+lvlIdx]=score;
+      var st=challengeStarsFor(lvlIdx,score);
+      if(!levelStars[''+lvlIdx]||st>levelStars[''+lvlIdx])levelStars[''+lvlIdx]=st;
+      saveChallengeData();
+    }
+    gain=(first||beatChallenge)?2:1;              /* first clear / new best double reward, replays still pay */
+    if(beatChallenge)floats.push({txt:'NEW BEST!',life:1.5,max:1.5,x:W/2,y:H/2-34,col:'#c99aff',size:9});
   }
   if(gain>0){grantChest(gain);saveChests();}
   var lifeUp=false;
@@ -1185,6 +1194,7 @@ function update(dt){
         balls[i].d+=Math.min(gap,spd*CATCH*dt);
         if(target-balls[i].d<=0.4){
           balls[i].d=target;balls[i].clackFlash=0.12;
+           if(parts.length<420){var _cp=pathPos(target);parts.push({x:_cp.x,y:_cp.y,life:0.12,max:0.12,type:'ring',col:'#ffffff',r:1.6});}
           if(!checkMatch(i)){
             /* track clack removed */
           }
@@ -1197,7 +1207,8 @@ function update(dt){
     if(balls.length&&balls[0].d<0)balls[0].d=0;
     for(var k=1;k<balls.length;k++){
       var t2=balls[k-1].d-SP;
-      if(balls[k].d>t2){balls[k].d=t2;balls[k].clackFlash=0.12;if(!checkMatch(k)){/* track clack removed */}if(state!=='play')return}
+      if(balls[k].d>t2){balls[k].d=t2;balls[k].clackFlash=0.12;
+           if(parts.length<420){var _cp2=pathPos(t2);parts.push({x:_cp2.x,y:_cp2.y,life:0.12,max:0.12,type:'ring',col:'#ffffff',r:1.6});}if(!checkMatch(k)){/* track clack removed */}if(state!=='play')return}
     }
   }
   if(balls.length&&balls[0].d>=pathLen-4){startDying();return}
@@ -1207,7 +1218,7 @@ function update(dt){
   }else{dangerAmt=Math.max(0,dangerAmt-dt*3)}
   for(var s=shots.length-1;s>=0;s--){
     var sh=shots[s];sh.x+=sh.vx*dt;sh.y+=sh.vy*dt;
-    if(Math.random()<0.3&&parts.length<360)parts.push({x:sh.x,y:sh.y,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,life:0.16,max:0.2,col:'#cfe8ff',r:0.8,spark:true});
+    if(Math.random()<0.2&&parts.length<360)parts.push({x:sh.x,y:sh.y,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,life:0.16,max:0.2,col:'#cfe8ff',r:0.8,spark:true});
     if(sh.x<-12||sh.x>W+12||sh.y<-12||sh.y>H+12){shots.splice(s,1);continue}
     var consumed=false;
     for(var w=0;w<powerups.length;w++){
@@ -1582,6 +1593,9 @@ function drawTitle(){
   ctx.fillText('◀  '+modeLabels[modes.indexOf(mode)]+'  ▶',W/2,180);
   ctx.fillStyle=best>0?'#ffe066':'#4a5566';ctx.font='7px monospace';
   ctx.fillText(best>0?('BEST  '+best):'FIRST RUN',W/2,199);
+  var _lb=levelBest[''+titleSel]||0,_ls=levelStars[''+titleSel]||0;
+  ctx.fillStyle=_lb>0?'#c9a6ff':'#4a5566';ctx.font='6px monospace';
+  ctx.fillText(_lb>0?(_ls>=3?'★★★ ':_ls>=2?'★★  ':'★    ')+'LEVEL BEST '+_lb+'  TARGET '+levelTarget(titleSel):'LEVEL TARGET '+levelTarget(titleSel),W/2,211);
   ctx.fillStyle='#bfe';ctx.font='7px monospace';
   ctx.fillText('SCROLL aim  •  TAP swap  •  SIDE shoot',W/2,228);
   ctx.fillStyle='#ffe066';ctx.font='bold 11px monospace';
@@ -1679,12 +1693,12 @@ var chests=0,pity=0,invCat=0,invMsg='',invMsgT=0;
 var owned={ex:{spark:1},launch:{cannon:1},guide:{line:1},trail:{glow:1},aura:{none:1}};
 var equip={ex:'spark',launch:'cannon',guide:'line',trail:'glow',aura:'none'};
 var clearedLv={};
-try{var _c0=localStorage.getItem('z1chests');if(_c0!==null)chests=Math.max(0,parseInt(_c0)||0)}catch(e){}
-try{var _p0=localStorage.getItem('z1pity');if(_p0!==null)pity=Math.max(0,parseInt(_p0)||0)}catch(e){}
-try{var _o0=localStorage.getItem('z1own');if(_o0){var _oj=JSON.parse(_o0);for(var _ok in _oj)owned[_ok]=_oj[_ok]}}catch(e){}
-try{var _e0=localStorage.getItem('z1eq');if(_e0){var _ej=JSON.parse(_e0);for(var _ek in _ej)equip[_ek]=_ej[_ek]}}catch(e){}
-try{var _l0=localStorage.getItem('z1clr');if(_l0)clearedLv=JSON.parse(_l0)}catch(e){}
-function saveChests(){try{localStorage.setItem('z1chests',''+chests);localStorage.setItem('z1pity',''+pity);localStorage.setItem('z1own',JSON.stringify(owned));localStorage.setItem('z1eq',JSON.stringify(equip));localStorage.setItem('z1clr',JSON.stringify(clearedLv))}catch(e){}}
+try{var _c0=safeLSGet('z1chests',null);if(_c0!==null)chests=Math.max(0,parseInt(_c0)||0)}catch(e){}
+try{var _p0=safeLSGet('z1pity',null);if(_p0!==null)pity=Math.max(0,parseInt(_p0)||0)}catch(e){}
+try{var _o0=safeLSGet('z1own',null);if(_o0){var _oj=JSON.parse(_o0);for(var _ok in _oj)owned[_ok]=_oj[_ok]}}catch(e){}
+try{var _e0=safeLSGet('z1eq',null);if(_e0){var _ej=JSON.parse(_e0);for(var _ek in _ej)equip[_ek]=_ej[_ek]}}catch(e){}
+try{var _l0=safeLSGet('z1clr',null);if(_l0)clearedLv=JSON.parse(_l0)}catch(e){}
+function saveChests(){safeLSSet('z1chests',chests);safeLSSet('z1pity',pity);safeLSSetJSON('z1own',owned);safeLSSetJSON('z1eq',equip);safeLSSetJSON('z1clr',clearedLv)}
 function grantChest(n){chests+=Math.max(1,n||1);saveChests()}
 function ownedCount(){
   var t=0,u=0;
@@ -2648,6 +2662,73 @@ function miniDraw(){
   ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.strokeRect(1,1,W-3,H-3);
 }
 
+/* ── Gamepad fallback ── */
+var gpPrevButtons=[],gpIndex=-1;
+function gpButton(gp,i){return !!(gp&&gp.buttons&&gp.buttons[i]&&(gp.buttons[i].pressed||gp.buttons[i].value>0.5));}
+function gpAxis(gp,i,dz){if(!gp||!gp.axes||typeof gp.axes[i]!=='number')return 0;var v=gp.axes[i];return Math.abs(v)<(dz||0.16)?0:v;}
+function pollGamepad(){
+  try{
+    if(typeof navigator==='undefined'||typeof navigator.getGamepads!=='function')return;
+    var list=navigator.getGamepads();if(!list)list=[];
+    var gp=null,ni=-1;
+    for(var i=0;i<list.length;i++){if(list[i]&&list[i].connected){gp=list[i];ni=i;break;}}
+    if(!gp){gpIndex=-1;gpPrevButtons=[];window.__zmGamepad={connected:false};return;}
+    var prev=gpPrevButtons.length?gpPrevButtons:[];
+    var cur=[];for(var b=0;b<gp.buttons.length;b++)cur[b]=gpButton(gp,b);
+    gpIndex=ni;
+    var lx=gpAxis(gp,0,0.16),ly=gpAxis(gp,1,0.16);
+    var rx=gpAxis(gp,2,0.16),ry=gpAxis(gp,3,0.16);
+    var stick=Math.hypot(lx,ly);
+    if(state==='play'){
+      if(stick>0.18)aimA=Math.atan2(ly,lx);
+      if(gpButton(gp,14))aimA-=0.06;if(gpButton(gp,15))aimA+=0.06;
+      if(gpButton(gp,12))aimA-=0.04;if(gpButton(gp,13))aimA+=0.04;
+      if((cur[0]&&!prev[0])||(gpButton(gp,7)&&!prev[7]))fire(true);
+      if(cur[1]&&!prev[1])swapBalls();
+      if(cur[2]&&!prev[2])toggleMusic();
+      if(cur[3]&&!prev[3]){state='title';sfx('mode');}
+    }else if(state==='title'){
+      if((cur[14]&&!prev[14])&&(maxUnlocked>0)){titleSel=Math.max(0,titleSel-1);sfx('swap');}
+      if((cur[15]&&!prev[15])&&(maxUnlocked>0)){titleSel=Math.min(maxUnlocked,titleSel+1);sfx('swap');}
+      if(cur[12]&&!prev[12]&&modes.length){var di=modes.indexOf(mode);mode=modes[(di+modes.length-1)%modes.length];sfx('mode');}
+      if(cur[13]&&!prev[13]&&modes.length){var di2=modes.indexOf(mode);mode=modes[(di2+1)%modes.length];sfx('mode');}
+      if(cur[0]&&!prev[0]){startMusic();startGame(mode==='gauntlet'?0:titleSel);}
+      if(cur[3]&&!prev[3]){state='inv';sfx('mode');}
+    }else if(state==='over'){
+      if(cur[0]&&!prev[0])startGame(mode==='gauntlet'?0:titleSel);
+    }else if(state==='win'){
+      if(cur[0]&&!prev[0]){endless=true;loadLevel(LEVELS.length);sfx('levelup');}
+    }else if(state==='inv'){
+      if(cur[14]&&!prev[14])invScroll(-1);
+      if(cur[15]&&!prev[15])invScroll(1);
+      if(cur[12]&&!prev[12])invScroll(-1);
+      if(cur[13]&&!prev[13])invScroll(1);
+      if(cur[0]&&!prev[0])openChest();
+      if(cur[1]&&!prev[1]){state='title';sfx('mode');}
+    }else if(state==='mini'){
+      if(cur[0]&&!prev[0])miniJump();
+    }else if(state==='clear'){
+      if(cur[0]&&!prev[0])clearT=0;
+    }
+    gpPrevButtons=cur;
+    window.__zmGamepad={connected:true,index:ni,axes:[lx,ly,rx,ry],buttons:cur.slice()};
+  }catch(e){window.__zmGamepad={connected:false,error:String(e)};}
+}
+
+function safeLSGet(key,def){try{var v=localStorage.getItem(key);return v===null?def:v;}catch(e){return def;}}
+function safeLSSet(key,val){try{localStorage.setItem(key,String(val));return true;}catch(e){return false;}}
+function safeLSJSON(key,def){try{var v=localStorage.getItem(key);if(v===null)return def;return JSON.parse(v);}catch(e){return def;}}
+function safeLSSetJSON(key,val){try{localStorage.setItem(key,JSON.stringify(val));return true;}catch(e){return false;}}
+
+/* ── Replayable score challenges ── */
+var levelBest={},levelStars={};
+function levelTarget(idx){return 1200+idx*500;}
+function challengeStarsFor(idx,score){
+  var s=1;if(score>=levelTarget(idx))s=2;if(score>=Math.round(levelTarget(idx)*1.6))s=3;return s;
+}
+function loadChallengeData(){try{levelBest=safeLSJSON('z1lvlbest',{})||{};levelStars=safeLSJSON('z1lvlstars',{})||{}}catch(e){levelBest={};levelStars={}}}
+function saveChallengeData(){safeLSSetJSON('z1lvlbest',levelBest);safeLSSetJSON('z1lvlstars',levelStars);}
+loadChallengeData();
 /* ── Init ── */
 try{best=+localStorage.getItem('z1best')||0;maxUnlocked=+localStorage.getItem('z1max')||0;var _sm=localStorage.getItem('z1mode');if(_sm&&modes.indexOf(_sm)>=0)mode=_sm}catch(e){}
 for(var _mi=0;_mi<26;_mi++)motes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*2.4,vy:-(0.25+Math.random()*0.9),r:0.5+Math.random()*0.8,ph:Math.random()*6.28,al:0.04+Math.random()*0.1});
@@ -2656,9 +2737,11 @@ buildAllMarbles();buildCannon();buildBG();
 /* ── Main loop ── */
 var acc=0,FIXED=1/120,ERRMSG='';
 window.addEventListener('error',function(ev){if(!ERRMSG)ERRMSG=(ev.message||'error')+' @'+(ev.lineno||0)});
+window.addEventListener('unhandledrejection',function(ev){if(!ERRMSG)ERRMSG=((ev.reason&&ev.reason.message)||String(ev.reason)||'promise rejection')+' @loop'});
 function loop(now){
   try{
     var dt=Math.min(0.05,(now-(loop.last||now))/1000);loop.last=now;
+    pollGamepad();
     acc+=dt;
     while(acc>=FIXED){update(FIXED);acc-=FIXED}
     musicTick();
